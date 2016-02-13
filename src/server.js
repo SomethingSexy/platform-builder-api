@@ -1,13 +1,17 @@
 import Koa from 'koa';
-import koaStatic from 'koa-static';
-import convert from 'koa-convert';
 import bodyParser from 'koa-bodyparser';
 import routes from './routes/index.js';
+import mongoose from 'mongoose';
+
+// setup mongoose to use Promises instead
+mongoose.Promise = global.Promise;
+
+function connect() {
+  const options = { server: { socketOptions: { keepAlive: 1 } } };
+  return mongoose.connect('mongodb://localhost/platformbuilder', options).connection;
+}
 
 const app = new Koa();
-
-// setup our static loader, we need to use convert because this is old middleware
-app.use(convert(koaStatic('public', {})));
 
 // logger
 app.use(async (ctx, next) => {
@@ -22,4 +26,11 @@ app.use(bodyParser());
 
 routes(app);
 
-app.listen(process.env.PORT || 5001);
+connect()
+  .on('error', console.log)
+  .on('disconnected', connect)
+  .once('open', () => {
+    app.listen(process.env.PORT || 5001);
+  });
+
+
