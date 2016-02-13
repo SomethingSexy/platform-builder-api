@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import uuid from 'uuid';
+import Platform from '../models/platform.js';
 
 const router = new Router({
   prefix: '/api'
@@ -12,14 +13,13 @@ export default (app) => {
   router.post('/platform', async (ctx, next) => {
     try {
       await next();
-      ctx.body = Object.assign({}, {
-        id: uuid.v4(),
-        configuration: {
-          fields: []
-        },
-        parts: [],
-        partGroups: []
-      }, ctx.request.body);
+      const platform = new Platform(ctx.request.body);
+
+      await platform.save()
+      .then(savedPlatform => {
+        ctx.body = savedPlatform;
+      });
+
       ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };

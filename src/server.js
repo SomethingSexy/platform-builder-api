@@ -26,6 +26,7 @@ app.use(bodyParser());
 
 routes(app);
 
+// connect to our DB before we start taking requests
 connect()
   .on('error', console.log)
   .on('disconnected', connect)
