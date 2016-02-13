@@ -21,6 +21,7 @@
     "merge": "^1.2.0",
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.3",
+    "mongoose-materialized": "^0.1.8",
     "uuid": "2.0.1"
   },
   "devDependencies": {

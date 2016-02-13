@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+import Category from '../models/category.js';
 
 const router = new Router({
   prefix: '/api'
