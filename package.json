@@ -40,8 +40,10 @@
     "babel-preset-stage-1": "^6.3.13",
     "babel-preset-stage-3": "^6.3.13",
     "babel-register": "^6.5.2",
+    "chai": "^3.5.0",
     "eslint-config-airbnb": "0.0.7",
     "eslint-plugin-react": "^3.2.2",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "supertest": "^1.2.0"
   }
 }

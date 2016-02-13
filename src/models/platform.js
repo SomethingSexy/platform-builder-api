@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
-const platformSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const platformSchema = new Schema({
   name: String,
   description: String,
+  _categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
   configuration: {
     showCompany: Boolean,
     showBrands: Boolean,

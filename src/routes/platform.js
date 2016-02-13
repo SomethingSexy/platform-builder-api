@@ -21,7 +21,7 @@ export default (app) => {
         ctx.body = savedPlatform;
       });
 
-      // we will also need to add a new category
+      // we will also need to add a new category only if the platform is set to active
 
       ctx.status = 200;
     } catch (err) {

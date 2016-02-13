@@ -34,4 +34,4 @@ connect()
     app.listen(process.env.PORT || 5001);
   });
 
-
+export default app;
