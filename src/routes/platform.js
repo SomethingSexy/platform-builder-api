@@ -17,8 +17,11 @@ export default (app) => {
 
       await platform.save()
       .then(savedPlatform => {
+        // return what was saved
         ctx.body = savedPlatform;
       });
+
+      // we will also need to add a new category
 
       ctx.status = 200;
     } catch (err) {
@@ -44,15 +47,18 @@ export default (app) => {
   router.get('/platform/:id', async (ctx, next) => {
     try {
       await next();
-      ctx.body = Object.assign({}, {
-        id: ctx.params.id,
-        // this really ends up being the parent platform if it has one?
-        category: {
-          id: 1,
-          name: 'Firearm'
+      await Platform.findById(ctx.params.id)
+      .then(platform => {
+        if (platform) {
+          ctx.body = platform;
+          ctx.status = 200;
+        } else {
+          ctx.status = 404;
         }
+      })
+      .catch(err => {
+        ctx.status = 500;
       });
-      ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };
       ctx.status = err.status || 500;
