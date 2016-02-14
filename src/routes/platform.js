@@ -50,7 +50,6 @@ export default (app) => {
       await next();
       // new: true tells the update to return the new model
       await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true})
-      .exec()
       .then(platform => {
         ctx.body = platform;
         ctx.status = 200;
