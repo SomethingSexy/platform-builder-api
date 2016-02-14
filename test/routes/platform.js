@@ -105,5 +105,34 @@ describe('Platform Routes', () => {
           });
       });
     });
+
+    it('should add and remove a field', (done) => {
+      addTestPlatform({ name: 'balls', fields: [{type: 'input', label: 'Stuff'}]}, (err, res) => {
+        request
+          .put('/api/platform/' + res.body._id)
+          .send({ fields: [{type: 'textarea', label: 'WHAT'}]})
+          .expect(200, (err, res) => {
+            if (err) return done(err);
+            expect(res.body.fields).to.be.an('array');
+            expect(res.body.fields.length).to.eql(1);
+            expect(res.body.fields[0].type).to.eql('textarea');
+            done();
+          });
+      });
+    });
+    it('should add, remove, and keep a field', (done) => {
+      // remove stuff, add WHAT and keep balls
+      addTestPlatform({ name: 'balls', fields: [{type: 'input', label: 'Stuff'}, {type: 'input', label: 'balls'}]}, (err, res) => {
+        request
+          .put('/api/platform/' + res.body._id)
+          .send({ fields: [{type: 'textarea', label: 'WHAT'}, {_id: res.body.fields[1]._id, type: 'input', label: 'balls'}]})
+          .expect(200, (err, res) => {
+            if (err) return done(err);
+            expect(res.body.fields).to.be.an('array');
+            expect(res.body.fields.length).to.eql(2);
+            done();
+          });
+      });
+    });
   });
 });
