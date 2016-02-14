@@ -1,10 +1,21 @@
 import Router from 'koa-router';
 import uuid from 'uuid';
 import Platform from '../models/platform.js';
+import Category from '../models/category.js';
 
 const router = new Router({
   prefix: '/api'
 });
+
+function createCategory(rawCategory) {
+  return new Category(rawCategory)
+    .save();
+}
+
+function updatePlatformCategory(platform, category) {
+  platform._category = category._id;
+  return platform.save();
+}
 
 // This will be temporary until we can connect to api server
 export default (app) => {
@@ -13,16 +24,20 @@ export default (app) => {
   router.post('/platform', async (ctx, next) => {
     try {
       await next();
-      const platform = new Platform(ctx.request.body);
-
-      await platform.save()
-      .then(savedPlatform => {
+      await new Platform(ctx.request.body).save()
+      .then(createdPlatform => {
         // return what was saved
-        ctx.body = savedPlatform;
+        ctx.body = createdPlatform;
+        // if the platform we are creating is active immediately then add the category
+        if (createdPlatform.active) {
+          return createCategory({ name: createdPlatform.name, parentId: null, _platformId: createdPlatform._id })
+          .then(updatePlatformCategory.bind(undefined, createdPlatform))
+          .then(platform => {
+            // override the body here we the latest returned
+            ctx.body = platform;
+          });
+        }
       });
-
-      // we will also need to add a new category only if the platform is set to active
-
       ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };
@@ -33,11 +48,13 @@ export default (app) => {
   router.put('/platform/:id', async (ctx, next) => {
     try {
       await next();
-
-      // part diagrams will be stored inpendently of a platform
-      // if part is an object we will want to save that separately
-      ctx.body = Object.assign({}, ctx.request.body);
-      ctx.status = 200;
+      // new: true tells the update to return the new model
+      await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true})
+      .exec()
+      .then(platform => {
+        ctx.body = platform;
+        ctx.status = 200;
+      });
     } catch (err) {
       ctx.body = { message: err.message };
       ctx.status = err.status || 500;

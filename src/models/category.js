@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 import materializedPlugin from 'mongoose-materialized';
 
-const categorySchema = new mongoose.Schema({
-  name: String
+const Schema = mongoose.Schema;
+
+const categorySchema = new Schema({
+  name: String,
+  _platformId: { type: Schema.Types.ObjectId, ref: 'Platform', index: true } // not sure we need the ref here to be honest
 });
 
 categorySchema.plugin(materializedPlugin);
