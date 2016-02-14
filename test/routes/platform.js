@@ -44,7 +44,8 @@ describe('Platform Routes', () => {
         .expect(200, (err, res) => {
           if (err) return done(err);
           assert.typeOf(res.body, 'object');
-          expect(res.body._category).to.be.a('string');
+          expect(res.body._category.name).to.equal('balls');
+          expect(res.body._category.description).to.equal(undefined);
           done();
         });
     });
@@ -151,5 +152,18 @@ describe('Platform Routes', () => {
       });
     });
 
+    it('should active the platform and create a category', (done) => {
+      addTestPlatform({ name: 'balls', description: 'big balls'}, (err, res) => {
+        request
+          .put('/api/platform/' + res.body._id)
+          .send({ active: true })
+          .expect(200, (err, res) => {
+            if (err) return done(err);
+            expect(res.body._category.name).to.equal('balls');
+            expect(res.body._category.description).to.equal('big balls');
+            done();
+          });
+      });
+    });
   });
 });

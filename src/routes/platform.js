@@ -25,15 +25,16 @@ export default (app) => {
     try {
       await next();
       let platform = await new Platform(ctx.request.body).save();
-      // return what was saved
-      ctx.body = platform;
+
       // if the platform we are creating is active immediately then add the category
       if (platform.active) {
         const category = await createCategory({ name: platform.name, description: platform.description, parentId: null, _platformId: platform._id });
         platform = await updatePlatformCategory(platform, category);
-        // override the body here we the latest returned
-        ctx.body = platform;
+        // populate after save without having to refetch everything
+        await Platform.populate(platform, {path: '_category'});
       }
+      // return what was saved
+      ctx.body = platform;
       ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };
@@ -48,25 +49,22 @@ export default (app) => {
       // this should handle the adding and removing of sub documents
       // as they are updating the full document at once
       let platform = await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true});
-      ctx.body = platform;
-      ctx.status = 200;
-
-        // if the platform is active and we don't have a category set yet then 
-        // we need to create a category
-        // if (platform.active && !platform._category) {
-        //   return createCategory({ name: createdPlatform.name, description: createdPlatform.description, parentId: null, _platformId: createdPlatform._id })
-        //   .then(updatePlatformCategory.bind(undefined, createdPlatform));
-        // }
-
-        // check to see if this platform has a category, if so update it
-      if (platform._category) {
+      // if the platform is active and we don't have a category set yet then
+      // we need to create a category
+      if (platform.active && !platform._category) {
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: null, _platformId: platform._id });
+        platform = await updatePlatformCategory(platform, category);
+        // populate after save without having to refetch everything
+        await Platform.populate(platform, {path: '_category'});
+      } else if (platform._category) {  // check to see if this platform has a category, if so update it
         await Category.findByIdAndUpdate(platform._category, {
           name: platform.name,
           description: platform.description
         });
         platform = await Platform.findById(ctx.params.id).populate('_category').exec();
-        ctx.body = platform;
       }
+      ctx.body = platform;
+      ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };
       ctx.status = err.status || 500;
