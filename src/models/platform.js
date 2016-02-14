@@ -34,6 +34,8 @@ const platformSchema = new Schema({
   showPhotos: { type: Boolean, default: false },
   showTransactions: { type: Boolean, default: false },
   allowAdditionalParts: { type: Boolean, default: false },
+  // maybe not alll platforms will allow products and they will just be used to organize 
+  allowProducts: { type: Boolean, default: true },
   fields: [fieldSchema],
   parts: [partSchema]
 });

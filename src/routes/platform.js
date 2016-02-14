@@ -24,20 +24,16 @@ export default (app) => {
   router.post('/platform', async (ctx, next) => {
     try {
       await next();
-      await new Platform(ctx.request.body).save()
-      .then(createdPlatform => {
-        // return what was saved
-        ctx.body = createdPlatform;
-        // if the platform we are creating is active immediately then add the category
-        if (createdPlatform.active) {
-          return createCategory({ name: createdPlatform.name, parentId: null, _platformId: createdPlatform._id })
-          .then(updatePlatformCategory.bind(undefined, createdPlatform))
-          .then(platform => {
-            // override the body here we the latest returned
-            ctx.body = platform;
-          });
-        }
-      });
+      let platform = await new Platform(ctx.request.body).save();
+      // return what was saved
+      ctx.body = platform;
+      // if the platform we are creating is active immediately then add the category
+      if (platform.active) {
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: null, _platformId: platform._id });
+        platform = await updatePlatformCategory(platform, category);
+        // override the body here we the latest returned
+        ctx.body = platform;
+      }
       ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };
@@ -49,11 +45,28 @@ export default (app) => {
     try {
       await next();
       // new: true tells the update to return the new model
-      await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true})
-      .then(platform => {
+      // this should handle the adding and removing of sub documents
+      // as they are updating the full document at once
+      let platform = await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true});
+      ctx.body = platform;
+      ctx.status = 200;
+
+        // if the platform is active and we don't have a category set yet then 
+        // we need to create a category
+        // if (platform.active && !platform._category) {
+        //   return createCategory({ name: createdPlatform.name, description: createdPlatform.description, parentId: null, _platformId: createdPlatform._id })
+        //   .then(updatePlatformCategory.bind(undefined, createdPlatform));
+        // }
+
+        // check to see if this platform has a category, if so update it
+      if (platform._category) {
+        await Category.findByIdAndUpdate(platform._category, {
+          name: platform.name,
+          description: platform.description
+        });
+        platform = await Platform.findById(ctx.params.id).populate('_category').exec();
         ctx.body = platform;
-        ctx.status = 200;
-      });
+      }
     } catch (err) {
       ctx.body = { message: err.message };
       ctx.status = err.status || 500;

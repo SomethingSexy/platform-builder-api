@@ -134,5 +134,22 @@ describe('Platform Routes', () => {
           });
       });
     });
+
+    it('should update the category with the new name and description', (done) => {
+      addTestPlatform({ name: 'balls', description: 'big balls', active: true}, (err, res) => {
+        request
+          .put('/api/platform/' + res.body._id)
+          .send({ description: 'my balls'})
+          .expect(200, (err, res) => {
+            if (err) return done(err);
+            assert.typeOf(res.body, 'object');
+            expect(res.body._id).to.be.a('string');
+            expect(res.body.description).to.equal('my balls');
+            expect(res.body._category.description).to.equal('my balls');
+            done();
+          });
+      });
+    });
+
   });
 });
