@@ -61,6 +61,19 @@ describe('Platform Routes', () => {
           done();
         });
     });
+
+    it('should fail because name is not defined when passing active', (done) => {
+      request
+        .post('/api/platform')
+        .send({ active: true})
+        .expect(400, (err, res) => {
+          if (err) return done(err);
+          assert.typeOf(res.body, 'array');
+          expect(res.body[0].field).to.equal('name');
+          done();
+        });
+    });
+
   });
 
   describe('put', () => {

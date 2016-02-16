@@ -17,6 +17,27 @@ function updatePlatformCategory(platform, category) {
   return platform.save();
 }
 
+function handleError(error) {
+  const response = {};
+  if (error.name === 'ValidationError') {
+    const errors = Object.keys(error.errors).map((field) => {
+      return {
+        field,
+        kind: error.errors[field].kind,
+        value: error.errors[field].value,
+        message: error.errors[field].message
+      };
+    });
+    response.body = errors;
+    response.status = 400;
+  } else {
+    response.body = { message: error.message };
+    response.status = error.status || 500;
+  }
+
+  return response;
+}
+
 // This will be temporary until we can connect to api server
 export default (app) => {
   // create a platform
@@ -37,8 +58,9 @@ export default (app) => {
       ctx.body = platform;
       ctx.status = 200;
     } catch (err) {
-      ctx.body = { message: err.message };
-      ctx.status = err.status || 500;
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
     }
   });
 
@@ -68,8 +90,9 @@ export default (app) => {
       ctx.body = platform;
       ctx.status = 200;
     } catch (err) {
-      ctx.body = { message: err.message };
-      ctx.status = err.status || 500;
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
     }
   });
 
@@ -84,8 +107,9 @@ export default (app) => {
         ctx.status = 404;
       }
     } catch (err) {
-      ctx.body = { message: err.message };
-      ctx.status = err.status || 500;
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
     }
   });
 

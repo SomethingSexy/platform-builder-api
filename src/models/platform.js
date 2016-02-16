@@ -22,7 +22,12 @@ const partSchema = new Schema({
 });
 
 const platformSchema = new Schema({
-  name: String,
+  name: {
+    type: String,
+    required: function() {
+      return this.active ? true : false;
+    }
+  },
   description: String,
   _category: { type: Schema.Types.ObjectId, ref: 'Category' },
   // determines if the platform is active or not
