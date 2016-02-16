@@ -74,18 +74,13 @@ export default (app) => {
   router.get('/platform/:id', async (ctx, next) => {
     try {
       await next();
-      await Platform.findById(ctx.params.id)
-      .then(platform => {
-        if (platform) {
-          ctx.body = platform;
-          ctx.status = 200;
-        } else {
-          ctx.status = 404;
-        }
-      })
-      .catch(err => {
-        ctx.status = 500;
-      });
+      const platform = await Platform.findById(ctx.params.id);
+      if (platform) {
+        ctx.body = platform;
+        ctx.status = 200;
+      } else {
+        ctx.status = 404;
+      }
     } catch (err) {
       ctx.body = { message: err.message };
       ctx.status = err.status || 500;

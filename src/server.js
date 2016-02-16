@@ -8,7 +8,7 @@ mongoose.Promise = global.Promise;
 
 function connect() {
   const options = { server: { socketOptions: { keepAlive: 1 } } };
-  return mongoose.connect('mongodb://localhost/platformbuilder', options).connection;
+  return mongoose.connect('mongodb://' + process.env.DB_HOST +  '/' + process.env.DB_NAME, options).connection;
 }
 
 const app = new Koa();
