@@ -9,4 +9,6 @@
 DB_HOST=
 # database name
 DB_NAME=
+# Application port
+PORT=
 ```

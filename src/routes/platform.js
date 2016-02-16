@@ -49,6 +49,7 @@ export default (app) => {
       // this should handle the adding and removing of sub documents
       // as they are updating the full document at once
       let platform = await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true});
+
       // if the platform is active and we don't have a category set yet then
       // we need to create a category
       if (platform.active && !platform._category) {
@@ -63,6 +64,7 @@ export default (app) => {
         });
         platform = await Platform.findById(ctx.params.id).populate('_category').exec();
       }
+
       ctx.body = platform;
       ctx.status = 200;
     } catch (err) {

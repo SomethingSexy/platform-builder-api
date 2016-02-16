@@ -68,12 +68,13 @@ describe('Platform Routes', () => {
       addTestPlatform({ name: 'balls'}, (err, res) => {
         request
           .put('/api/platform/' + res.body._id)
-          .send({ description: 'my balls'})
+          .send({ description: 'my balls', showCompany: true})
           .expect(200, (err, res) => {
             if (err) return done(err);
             assert.typeOf(res.body, 'object');
             expect(res.body._id).to.be.a('string');
             expect(res.body.description).to.equal('my balls');
+            expect(res.body.showCompany).to.equal(true);
             done();
           });
       });
