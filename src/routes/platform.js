@@ -2,6 +2,7 @@ import Router from 'koa-router';
 import uuid from 'uuid';
 import Platform from '../models/platform.js';
 import Category from '../models/category.js';
+import PartDefinition from '../models/partDefinition.js';
 
 const router = new Router({
   prefix: '/api'
@@ -99,7 +100,8 @@ export default (app) => {
   router.get('/platform/:id', async (ctx, next) => {
     try {
       await next();
-      const platform = await Platform.findById(ctx.params.id);
+      // make sure to populate category and parts
+      const platform = await Platform.findById(ctx.params.id).populate('_category parts').exec();
       if (platform) {
         ctx.body = platform;
         ctx.status = 200;
@@ -117,14 +119,26 @@ export default (app) => {
   router.post('/platform/:id/part', async (ctx, next) => {
     try {
       await next();
-      ctx.body = Object.assign({}, {
-        id: uuid.v4(),
-        active: false
-      }, ctx.request.body);
+      // create the part Definition
+      const partDefinition = await new PartDefinition(Object.assign({
+        active: false,
+        _createdPlatformId: ctx.params.id
+      }, ctx.request.body)).save();
+      // now find the platform
+      await Platform.findByIdAndUpdate(ctx.params.id, {
+        $push: {
+          'parts': partDefinition._id
+        }
+      }, {
+        safe: true
+      });
+
+      ctx.body = partDefinition;
       ctx.status = 200;
     } catch (err) {
-      ctx.body = { message: err.message };
-      ctx.status = err.status || 500;
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
     }
   });
 
@@ -139,8 +153,9 @@ export default (app) => {
       ctx.status = 200;
       ctx.body = {};
     } catch (err) {
-      ctx.body = { message: err.message };
-      ctx.status = err.status || 500;
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
     }
   });
 

@@ -21,6 +21,12 @@ function addTestPlatform(platform, callback) {
     .end(callback);
 }
 
+function getTestPlatform(platformid, callback) {
+  return request
+    .get('/api/platform/' + platformid)
+    .end(callback);
+}
+
 describe('Platform Routes', () => {
   describe('post', () => {
     it('should respond with 200', (done) => {
@@ -73,7 +79,6 @@ describe('Platform Routes', () => {
           done();
         });
     });
-
   });
 
   describe('put', () => {
@@ -176,6 +181,32 @@ describe('Platform Routes', () => {
             expect(res.body._category.name).to.equal('balls');
             expect(res.body._category.description).to.equal('big balls');
             done();
+          });
+      });
+    });
+  });
+
+  describe('post part', () => {
+    it('should respond with 200', (done) => {
+      addTestPlatform({ name: 'gun'}, (err, platformRes) => {
+        const platformId = platformRes.body._id;
+        request
+          .post('/api/platform/' + platformRes.body._id + '/part')
+          .send({ name: 'my part', description: 'stuff'})
+          .expect(200, (err, res) => {
+            if (err) return done(err);
+            // response should be the part
+            expect(res.body._id).to.be.a('string');
+            expect(res.body._createdPlatformId).to.equal(platformId);
+
+            // now fetch the platform again to make sure it returned
+            getTestPlatform(platformId, (err, fetchRes) => {
+              expect(fetchRes.body.parts).to.be.a('array');
+              expect(fetchRes.body.parts.length).to.equal(1);
+              expect(fetchRes.body.parts[0].name).to.equal('my part');
+              expect(fetchRes.body.parts[0].description).to.equal('stuff');
+              done();
+            });
           });
       });
     });
