@@ -43,7 +43,7 @@ function handleError(error) {
 export default (app) => {
   // create a platform
   // this can get called with just a category Id
-  router.post('/platform', async (ctx, next) => {
+  router.post('/platforms', async (ctx, next) => {
     try {
       await next();
       let platform = await new Platform(ctx.request.body).save();
@@ -65,7 +65,7 @@ export default (app) => {
     }
   });
 
-  router.put('/platform/:id', async (ctx, next) => {
+  router.put('/platforms/:id', async (ctx, next) => {
     try {
       await next();
       // new: true tells the update to return the new model
@@ -97,7 +97,8 @@ export default (app) => {
     }
   });
 
-  router.get('/platform/:id', async (ctx, next) => {
+  // return a single platform
+  router.get('/platforms/:id', async (ctx, next) => {
     try {
       await next();
       // make sure to populate category and parts
@@ -115,8 +116,27 @@ export default (app) => {
     }
   });
 
+  // return all platforms, probably want to paginate at some point
+  router.get('/platforms', async (ctx, next) => {
+    try {
+      await next();
+      // make sure to populate category and parts
+      const platforms = await Platform.find().populate('_category parts').exec();
+      if (platforms) {
+        ctx.body = platforms;
+        ctx.status = 200;
+      } else {
+        ctx.status = 404;
+      }
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
   // when we post a part it will not be active, until the platform is active
-  router.post('/platform/:id/part', async (ctx, next) => {
+  router.post('/platforms/:id/part', async (ctx, next) => {
     try {
       await next();
       // create the part Definition
@@ -142,7 +162,7 @@ export default (app) => {
     }
   });
 
-  router.del('/platform/:id/part/:partId', async (ctx, next) => {
+  router.del('/platforms/:id/part/:partId', async (ctx, next) => {
     try {
       await next();
       // this is what the api will do in the end
