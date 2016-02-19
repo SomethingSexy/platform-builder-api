@@ -1,5 +1,4 @@
 import Router from 'koa-router';
-import uuid from 'uuid';
 import Platform from '../models/platform.js';
 import Category from '../models/category.js';
 import PartDefinition from '../models/partDefinition.js';
@@ -172,6 +171,31 @@ export default (app) => {
       //    if it is not active remove from DB and platform
       ctx.status = 200;
       ctx.body = {};
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
+  // Delete all platforms, this is mainly used for testing now...probably don't want to support this ever
+  router.del('/platforms', async (ctx, next) => {
+    try {
+      await next();
+      await Platform.remove();
+      ctx.status = 200;
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
+  router.del('/platforms/:id', async (ctx, next) => {
+    try {
+      await next();
+      await Platform.remove({ _id: ctx.params.id});
+      ctx.status = 200;
     } catch (err) {
       const response = handleError(err);
       ctx.body = response.body;

@@ -238,6 +238,20 @@ describe('Platform Routes', () => {
     });
   });
 
+  describe('delete', () => {
+    it('should delete a single platform', async (done) => {
+      const savedPlatform = await addTestPlatform({ name: 'balls'});
+      let platform = await request
+        .delete('/api/platforms/' + savedPlatform.body._id)
+        .expect(200);
+      assert.typeOf(platform.body, 'object');
+      platform = await request
+        .get('/api/platforms/' + savedPlatform.body._id)
+        .expect(404);
+      done();
+    });
+  });
+
   describe('post part', () => {
     it('should respond with 200', (done) => {
       addTestPlatform({ name: 'gun'}).then(platformRes => {
