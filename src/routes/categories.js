@@ -10,7 +10,7 @@ export default (app) => {
   router.get('/categories', async (ctx, next) => {
     try {
       await next();
-      ctx.body = [{id: 1, name: 'Firearm'}];
+      ctx.body = await Category.GetFullArrayTree(); // eslint-disable-line new-cap
       ctx.status = 200;
     } catch (err) {
       ctx.body = { message: err.message };

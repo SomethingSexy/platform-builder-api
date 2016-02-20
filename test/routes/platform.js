@@ -4,6 +4,14 @@ import routes from '../../src/routes/platform.js';
 import supertest from 'supertest-as-promised';
 import chai from 'chai';
 import bodyParser from 'koa-bodyparser';
+import mongoose from 'mongoose';
+
+// drop the categories, mainly here when running locally
+if (mongoose.connection.collections.platforms) {
+  mongoose.connection.collections.platforms.drop((err) => {
+    console.log('collection dropped');
+  });
+}
 
 const expect = chai.expect;
 const assert = chai.assert;
