@@ -220,21 +220,36 @@ describe('Platform Routes', () => {
       });
     });
 
-    it('should active the platform and create a category', (done) => {
-      addTestPlatform({ name: 'balls', description: 'big balls'}).then(res => {
-        request
-          .put('/api/platforms/' + res.body._id)
+    it('should active the platform and create a category', async (done) => {
+      const createdPlatform = await addTestPlatform({ name: 'balls', description: 'big balls'});
+      try {
+        const response = await request
+          .put('/api/platforms/' + createdPlatform.body._id)
           .send({ active: true })
-          .expect(200)
-          .then(res => {
-            expect(res.body._category.name).to.equal('balls');
-            expect(res.body._category.description).to.equal('big balls');
-            done();
-          })
-          .catch(err => {
-            done(err);
-          });
-      });
+          .expect(200);
+        expect(response.body._category.name).to.equal('balls');
+        expect(response.body._category.description).to.equal('big balls');
+        done();
+      } catch(err) {
+        done(err);
+      }
+    });
+
+    it('should active the platform and create a category underneath another', async (done) => {
+      try {
+        const parentPlatform = await addTestPlatform({ name: 'balls', description: 'big balls', active: true});
+        const createdPlatform = await addTestPlatform({ name: 'balls', description: 'big balls', _parentCategoryId: parentPlatform.body._category._id});
+        const response = await request
+          .put('/api/platforms/' + createdPlatform.body._id)
+          .send({ active: true})
+          .expect(200);
+        expect(response.body._category.parentId).to.equal(parentPlatform.body._category._id);
+        expect(response.body._category.name).to.equal('balls');
+        expect(response.body._category.description).to.equal('big balls');
+        done();
+      } catch(err) {
+        done(err);
+      }
     });
   });
 

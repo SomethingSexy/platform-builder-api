@@ -21,6 +21,9 @@ const platformSchema = new Schema({
     }
   },
   description: String,
+  // if this platform is being added as sub platform use this
+  _parentCategoryId: Schema.Types.ObjectId,
+  // This is the category reference for this platform
   _category: { type: Schema.Types.ObjectId, ref: 'Category' },
   // determines if the platform is active or not
   active: { type: Boolean, default: false },

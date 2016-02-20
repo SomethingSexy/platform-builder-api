@@ -49,7 +49,7 @@ export default (app) => {
 
       // if the platform we are creating is active immediately then add the category
       if (platform.active) {
-        const category = await createCategory({ name: platform.name, description: platform.description, parentId: null, _platformId: platform._id });
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategoryId || null, _platformId: platform._id });
         platform = await updatePlatformCategory(platform, category);
         // populate after save without having to refetch everything
         await Platform.populate(platform, {path: '_category'});
@@ -75,7 +75,7 @@ export default (app) => {
       // if the platform is active and we don't have a category set yet then
       // we need to create a category
       if (platform.active && !platform._category) {
-        const category = await createCategory({ name: platform.name, description: platform.description, parentId: null, _platformId: platform._id });
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategoryId || null, _platformId: platform._id });
         platform = await updatePlatformCategory(platform, category);
         // populate after save without having to refetch everything
         await Platform.populate(platform, {path: '_category'});
