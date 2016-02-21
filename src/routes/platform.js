@@ -194,7 +194,14 @@ export default (app) => {
   router.del('/platforms/:id', async (ctx, next) => {
     try {
       await next();
-      await Platform.remove({ _id: ctx.params.id});
+      const platform = await Platform.findById(ctx.params.id);
+      await Platform.remove({ _id: platform._id});
+      // TODO: This will be SUPER dangerous if there are sub platforms
+      // from this. We either need to not allow this in the end or just
+      // allow deactivating.  Allow for testing now
+      if (platform._category) {
+        await Category.remove({_id: platform._category});
+      }
       ctx.status = 200;
     } catch (err) {
       const response = handleError(err);
