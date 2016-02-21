@@ -246,14 +246,35 @@ describe('Platform Routes', () => {
     it('should active the platform and create a category underneath another', async (done) => {
       try {
         const parentPlatform = await addTestPlatform({ name: 'balls', description: 'big balls', active: true});
-        const createdPlatform = await addTestPlatform({ name: 'balls', description: 'big balls', _parentCategoryId: parentPlatform.body._category._id});
+        const createdPlatform = await addTestPlatform({ name: 'balls 2', description: 'big balls', _parentCategory: {_id: parentPlatform.body._category._id}});
         const response = await request
           .put('/api/platforms/' + createdPlatform.body._id)
           .send({ active: true})
           .expect(200);
         expect(response.body._category.parentId).to.equal(parentPlatform.body._category._id);
-        expect(response.body._category.name).to.equal('balls');
+        expect(response.body._category.name).to.equal('balls 2');
         expect(response.body._category.description).to.equal('big balls');
+        expect(response.body._parentCategory.name).to.equal('balls');
+        expect(response.body._parentCategory._id).to.equal(parentPlatform.body._category._id);
+        done();
+      } catch(err) {
+        done(err);
+      }
+    });
+
+    it('should active the platform and create a category underneath another (passing just id for _parentCategory)', async (done) => {
+      try {
+        const parentPlatform = await addTestPlatform({ name: 'balls', description: 'big balls', active: true});
+        const createdPlatform = await addTestPlatform({ name: 'balls 2', description: 'big balls', _parentCategory: parentPlatform.body._category._id});
+        const response = await request
+          .put('/api/platforms/' + createdPlatform.body._id)
+          .send({ active: true})
+          .expect(200);
+        expect(response.body._category.parentId).to.equal(parentPlatform.body._category._id);
+        expect(response.body._category.name).to.equal('balls 2');
+        expect(response.body._category.description).to.equal('big balls');
+        expect(response.body._parentCategory.name).to.equal('balls');
+        expect(response.body._parentCategory._id).to.equal(parentPlatform.body._category._id);
         done();
       } catch(err) {
         done(err);

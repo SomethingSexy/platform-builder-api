@@ -49,10 +49,12 @@ export default (app) => {
 
       // if the platform we are creating is active immediately then add the category
       if (platform.active) {
-        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategoryId || null, _platformId: platform._id });
+        // I didnt populate on the initial find and update, so _parentCategory is just the id
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategory || null, _platformId: platform._id });
         platform = await updatePlatformCategory(platform, category);
         // populate after save without having to refetch everything
         await Platform.populate(platform, {path: '_category'});
+        await Platform.populate(platform, {path: '_parentCategory'});
       }
       // return what was saved
       ctx.body = platform;
@@ -75,16 +77,18 @@ export default (app) => {
       // if the platform is active and we don't have a category set yet then
       // we need to create a category
       if (platform.active && !platform._category) {
-        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategoryId || null, _platformId: platform._id });
+        // I didnt populate on the initial find and update, so _parentCategory is just the id
+        const category = await createCategory({ name: platform.name, description: platform.description, parentId: platform._parentCategory || null, _platformId: platform._id });
         platform = await updatePlatformCategory(platform, category);
         // populate after save without having to refetch everything
         await Platform.populate(platform, {path: '_category'});
+        await Platform.populate(platform, {path: '_parentCategory'});
       } else if (platform._category) {  // check to see if this platform has a category, if so update it
         await Category.findByIdAndUpdate(platform._category, {
           name: platform.name,
           description: platform.description
         });
-        platform = await Platform.findById(ctx.params.id).populate('_category').exec();
+        platform = await Platform.findById(ctx.params.id).populate('_category _parentCategory').exec();
       }
 
       ctx.body = platform;
@@ -101,7 +105,7 @@ export default (app) => {
     try {
       await next();
       // make sure to populate category and parts
-      const platform = await Platform.findById(ctx.params.id).populate('_category parts').exec();
+      const platform = await Platform.findById(ctx.params.id).populate('_category parts _parentCategory').exec();
       if (platform) {
         ctx.body = platform;
         ctx.status = 200;
@@ -120,7 +124,7 @@ export default (app) => {
     try {
       await next();
       // make sure to populate category and parts
-      const platforms = await Platform.find().populate('_category parts').exec();
+      const platforms = await Platform.find().populate('_category parts _parentCategory').exec();
       if (platforms) {
         ctx.body = platforms;
         ctx.status = 200;
