@@ -1,6 +1,6 @@
 import 'babel-polyfill'; // need this for async/await support
 import Koa from 'koa';
-import routes from '../../src/routes/platform.js';
+import routes from '../../src/routes/platforms.js';
 import supertest from 'supertest-as-promised';
 import chai from 'chai';
 import bodyParser from 'koa-bodyparser';
@@ -42,6 +42,7 @@ describe('Platform Routes', () => {
         .expect(200);
       assert.typeOf(platform.body, 'object');
       expect(platform.body._id).to.be.a('string');
+      expect(platform.body.parts).to.be.a('array');
       done();
     });
 

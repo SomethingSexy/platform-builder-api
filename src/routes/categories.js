@@ -5,7 +5,6 @@ const router = new Router({
   prefix: '/api'
 });
 
-// This will be temporary until we can connect to api server
 export default (app) => {
   router.get('/categories', async (ctx, next) => {
     try {

@@ -1,4 +1,4 @@
-import platformRoutes from './platform.js';
+import platformRoutes from './platforms.js';
 import categoryRoutes from './categories.js';
 
 export default (app) => {

@@ -38,7 +38,6 @@ function handleError(error) {
   return response;
 }
 
-// This will be temporary until we can connect to api server
 export default (app) => {
   // create a platform
   // this can get called with just a category Id
@@ -54,8 +53,13 @@ export default (app) => {
         platform = await updatePlatformCategory(platform, category);
         // populate after save without having to refetch everything
         await Platform.populate(platform, {path: '_category'});
+      }
+      // if we have a category, make sure to populate
+      if (platform._parentCategory) {
         await Platform.populate(platform, {path: '_parentCategory'});
       }
+
+      await Platform.populate(platform, {path: 'parts'});
       // return what was saved
       ctx.body = platform;
       ctx.status = 200;
@@ -90,6 +94,8 @@ export default (app) => {
         });
         platform = await Platform.findById(ctx.params.id).populate('_category _parentCategory').exec();
       }
+
+      await Platform.populate(platform, {path: 'parts'});
 
       ctx.body = platform;
       ctx.status = 200;
@@ -158,6 +164,23 @@ export default (app) => {
 
       ctx.body = partDefinition;
       ctx.status = 200;
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
+  router.put('/platforms/:id/parts/:partId', async (ctx, next) => {
+    try {
+      await next();
+      // this is what the api will do in the end
+      // 1. look up part
+      // 2. check to see if it is active
+      //    if it is active remove from platform but don't delete part in DB
+      //    if it is not active remove from DB and platform
+      ctx.status = 200;
+      ctx.body = await PartDefinition.findByIdAndUpdate(ctx.params.partId, ctx.request.body, {new: true});
     } catch (err) {
       const response = handleError(err);
       ctx.body = response.body;
