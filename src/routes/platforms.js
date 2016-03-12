@@ -194,8 +194,20 @@ export default (app) => {
       // this is what the api will do in the end
       // 1. look up part
       // 2. check to see if it is active
-      //    if it is active remove from platform but don't delete part in DB
+      //    if it is active remove from platform but don't delete part in DB, unless it isn't attached to anything, then remove
       //    if it is not active remove from DB and platform
+      const partDefinition = await PartDefinition.findById(ctx.params.partId);
+      await Platform.findByIdAndUpdate(ctx.params.id, {
+        $pullAll: {
+          'parts': [ctx.params.partId]
+        }
+      }, {
+        safe: true
+      });
+      // if it is not active yet then just remove it
+      if (!partDefinition.active) {
+        await PartDefinition.remove({ _id: partDefinition._id});
+      }
       ctx.status = 200;
       ctx.body = {};
     } catch (err) {

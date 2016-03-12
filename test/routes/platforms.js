@@ -325,4 +325,15 @@ describe('Platform Routes', () => {
       });
     });
   });
+
+  describe('remove part', async (done) => {
+    let savedPlatform = await addTestPlatform({ name: 'balls', parts: [{ name: 'part1', description: 'stuff'}]});
+    expect(savedPlatform.body.parts.length).to.equal(1);
+    await request
+      .delete(`/api/platforms/${savedPlatform.body._id}/${savedPlatform.parts[0]._id}`)
+      .expect(200);
+    savedPlatform = getTestPlatform(savedPlatform.body._id);
+    expect(savedPlatform.body.parts.length).to.equal(0);
+    done();
+  });
 });

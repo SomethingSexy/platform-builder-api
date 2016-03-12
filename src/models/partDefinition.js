@@ -18,7 +18,8 @@ const partSchema = new Schema({
   description: String,
   type: String,
   fields: [fieldSchema],
-  _createdPlatformId: { type: Schema.Types.ObjectId, index: true }
+  _createdPlatformId: { type: Schema.Types.ObjectId, index: true },
+  active: { type: Boolean, default: false }
 });
 
 export default mongoose.model('PartDefinition', partSchema);
