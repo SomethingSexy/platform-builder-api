@@ -13,6 +13,14 @@ const fieldSchema = new Schema({
   options: [optionSchema]
 });
 
+// this will define part groupings, it will
+// just have an array of part ids for now
+const partGroupSchema = new Schema({
+  name: String,
+  description: String,
+  parts: [Schema.Types.ObjectId]
+});
+
 const platformSchema = new Schema({
   name: {
     type: String,
@@ -20,7 +28,12 @@ const platformSchema = new Schema({
       return this.active ? true : false;
     }
   },
-  description: String,
+  description: {
+    type: String,
+    required: function nameRequired() {
+      return this.active ? true : false;
+    }
+  },
   // if this platform is being added as sub platform use this
   _parentCategory: { type: Schema.Types.ObjectId, ref: 'Category' },
   // This is the category reference for this platform
@@ -37,7 +50,8 @@ const platformSchema = new Schema({
   // maybe not alll platforms will allow products and they will just be used to organize
   allowProducts: { type: Boolean, default: true },
   fields: [fieldSchema],
-  parts: [{ type: Schema.Types.ObjectId, ref: 'PartDefinition' }] // can share part definitions across platforms so make them their own schema
+  parts: [{ type: Schema.Types.ObjectId, ref: 'PartDefinition' }], // can share part definitions across platforms so make them their own schema
+  partGroups: [partGroupSchema]
 });
 
 export default mongoose.model('Platform', platformSchema);

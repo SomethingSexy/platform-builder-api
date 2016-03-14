@@ -73,10 +73,16 @@ export default (app) => {
   router.put('/platforms/:id', async (ctx, next) => {
     try {
       await next();
+      // TODO: Use this to make sure we are only adding valid parts to the partGroup?
+      Platform.schema.path('partGroups').schema.path('parts').validate((parts) => {
+        // console.log(parts);
+        return true;
+      });
+
       // new: true tells the update to return the new model
       // this should handle the adding and removing of sub documents
       // as they are updating the full document at once
-      let platform = await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true});
+      let platform = await Platform.findByIdAndUpdate(ctx.params.id, ctx.request.body, {new: true, runValidators: true});
 
       // if the platform is active and we don't have a category set yet then
       // we need to create a category

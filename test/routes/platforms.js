@@ -43,6 +43,8 @@ describe('Platform Routes', () => {
       assert.typeOf(platform.body, 'object');
       expect(platform.body._id).to.be.a('string');
       expect(platform.body.parts).to.be.a('array');
+      expect(platform.body.partGroups).to.be.a('array');
+      expect(platform.body.partGroups.length).to.equal(0);
       done();
     });
 
@@ -77,12 +79,12 @@ describe('Platform Routes', () => {
     it('should create active platform with a category', (done) => {
       request
         .post('/api/platforms')
-        .send({ active: true, name: 'balls'})
+        .send({ active: true, name: 'balls', description: 'stuff'})
         .expect(200)
         .then(res => {
           assert.typeOf(res.body, 'object');
           expect(res.body._category.name).to.equal('balls');
-          expect(res.body._category.description).to.equal(undefined);
+          expect(res.body._category.description).to.equal('stuff');
           done();
         })
         .catch(err => {
@@ -112,7 +114,8 @@ describe('Platform Routes', () => {
         .expect(400)
         .then(res => {
           assert.typeOf(res.body, 'array');
-          expect(res.body[0].field).to.equal('name');
+          expect(res.body[0].field).to.equal('description');
+          expect(res.body[1].field).to.equal('name');
           done();
         })
         .catch(err => {
@@ -280,6 +283,59 @@ describe('Platform Routes', () => {
       } catch(err) {
         done(err);
       }
+    });
+
+    it('should add a partGroup', (done) => {
+      addTestPlatform({ name: 'balls'}).then(res => {
+        request
+          .put('/api/platforms/' + res.body._id)
+          .send({ partGroups: [{name: 'Lower', description: 'Lower receiver'}]})
+          .expect(200)
+          .then(res => {
+            expect(res.body.partGroups).to.be.an('array');
+            expect(res.body.partGroups.length).to.equal(1);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
+
+    it('should add a part to partGroup', (done) => {
+      addTestPlatform({ name: 'balls'}).then(res => {
+        request
+          .put('/api/platforms/' + res.body._id)
+          .send({ partGroups: [{name: 'Lower', description: 'Lower receiver', parts: ['56cbbdd11a393988b06384a0']}]})
+          .expect(200)
+          .then(res => {
+            expect(res.body.partGroups).to.be.an('array');
+            expect(res.body.partGroups.length).to.equal(1);
+            expect(res.body.partGroups[0].parts.length).to.equal(1);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
+
+    it('should add a remove from the partGroup', (done) => {
+      addTestPlatform({ name: 'balls', partGroups: [{name: 'Lower', description: 'Lower receiver', parts: ['56cbbdd11a393988b06384a0']}]}).then(res => {
+        request
+          .put('/api/platforms/' + res.body._id)
+          .send({ partGroups: [{name: 'Lower', description: 'Lower receiver', parts: []}]})
+          .expect(200)
+          .then(res => {
+            expect(res.body.partGroups).to.be.an('array');
+            expect(res.body.partGroups.length).to.equal(1);
+            expect(res.body.partGroups[0].parts.length).to.equal(0);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
     });
   });
 
