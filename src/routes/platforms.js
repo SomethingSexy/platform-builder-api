@@ -223,6 +223,27 @@ export default (app) => {
     }
   });
 
+  router.post('/platforms/:id/group', async (ctx, next) => {
+    try {
+      await next();
+      // grab the platform
+      const platform = await Platform.findById(ctx.params.id);
+      // create the part group so we can get the fully created one with id
+      const partGroup = platform.partGroups.create(ctx.request.body);
+      // push the part group
+      platform.partGroups.push(partGroup);
+      // save da platform
+      await platform.save();
+      // set that as the body
+      ctx.body = partGroup;
+      ctx.status = 200;
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
   // Delete all platforms, this is mainly used for testing now...probably don't want to support this ever
   router.del('/platforms', async (ctx, next) => {
     try {

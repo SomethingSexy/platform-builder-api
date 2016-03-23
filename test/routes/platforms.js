@@ -5,6 +5,7 @@ import supertest from 'supertest-as-promised';
 import chai from 'chai';
 import bodyParser from 'koa-bodyparser';
 import mongoose from 'mongoose';
+import { describe, it } from 'mocha';
 
 // drop the categories, mainly here when running locally
 if (mongoose.connection.collections.platforms) {
@@ -391,5 +392,24 @@ describe('Platform Routes', () => {
     savedPlatform = getTestPlatform(savedPlatform.body._id);
     expect(savedPlatform.body.parts.length).to.equal(0);
     done();
+  });
+
+  describe('post part group', () => {
+    it('should add a partGroup', (done) => {
+      addTestPlatform({ name: 'balls'}).then(res => {
+        request
+          .post(`/api/platforms/${res.body._id}/group`)
+          .send({ name: 'Lower', description: 'Lower receiver' })
+          .expect(200)
+          .then(res => {
+            expect(res.body).to.be.an('object');
+            expect(res.body._id).to.be.a('string');
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
   });
 });

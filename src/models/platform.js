@@ -18,7 +18,7 @@ const fieldSchema = new Schema({
 const partGroupSchema = new Schema({
   name: String,
   description: String,
-  parts: [Schema.Types.ObjectId]
+  parts: [Schema.Types.ObjectId] // these will link up to is from the platform schema parts
 });
 
 const platformSchema = new Schema({
@@ -51,7 +51,7 @@ const platformSchema = new Schema({
   allowProducts: { type: Boolean, default: true },
   fields: [fieldSchema],
   parts: [{ type: Schema.Types.ObjectId, ref: 'PartDefinition' }], // can share part definitions across platforms so make them their own schema
-  partGroups: [partGroupSchema]
+  partGroups: [partGroupSchema] // this will be internal to the platform
 });
 
 export default mongoose.model('Platform', platformSchema);

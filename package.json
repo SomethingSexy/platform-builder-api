@@ -30,9 +30,8 @@
     "uuid": "2.0.1"
   },
   "devDependencies": {
-    "airbnb-style": "2.0.0",
     "babel-cli": "^6.4.5",
-    "babel-eslint": "^4.0.5",
+    "babel-eslint": "^5.0.0",
     "babel-plugin-syntax-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-react-jsx": "^6.4.0",
@@ -42,8 +41,9 @@
     "babel-preset-stage-3": "^6.3.13",
     "babel-register": "^6.5.2",
     "chai": "^3.5.0",
-    "eslint-config-airbnb": "0.0.7",
-    "eslint-plugin-react": "^3.2.2",
+    "eslint": "2.2.0",
+    "eslint-config-airbnb": "^6.1.0",
+    "eslint-plugin-react": "^4.2.3",
     "mocha": "^2.4.5",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^2.0.2"
