@@ -322,7 +322,7 @@ describe('Platform Routes', () => {
     });
 
     it('should add a remove from the partGroup', (done) => {
-      addTestPlatform({ name: 'balls', partGroups: [{name: 'Lower', description: 'Lower receiver', parts: ['56cbbdd11a393988b06384a0']}]}).then(res => {
+      addTestPlatform({ name: 'balls', partGroups: [{ name: 'Lower', description: 'Lower receiver', parts: ['56cbbdd11a393988b06384a0'] }] }).then(res => {
         request
           .put('/api/platforms/' + res.body._id)
           .send({ partGroups: [{name: 'Lower', description: 'Lower receiver', parts: []}]})
@@ -410,6 +410,25 @@ describe('Platform Routes', () => {
             done(err);
           });
       });
+    });
+  });
+
+  describe('put part group', () => {
+    it('should update a partGroup', async (done) => {
+      try {
+        const addPlatform = await addTestPlatform({ name: 'balls', partGroups: [{ name: 'Lower', description: 'Lower receiver', parts: ['56cbbdd11a393988b06384a0'] }] });
+        const putResponse = await request
+            .put(`/api/platforms/${addPlatform.body._id}/group/${addPlatform.body.partGroups[0]._id}`)
+            .send({ _id: addPlatform.body.partGroups[0]._id, name: 'Lower', description: 'BALLS', parts: ['56cbbdd11a393988b06384a0'] })
+            .expect(200);
+        expect(putResponse.body).to.be.an('object');
+        expect(putResponse.body.description).to.equal('BALLS');
+        expect(putResponse.body.name).to.equal('Lower');
+        expect(putResponse.body.parts.length).to.equal(1);
+        done();
+      } catch (err) {
+        done(err);
+      }
     });
   });
 });

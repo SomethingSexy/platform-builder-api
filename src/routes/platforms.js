@@ -2,6 +2,7 @@ import Router from 'koa-router';
 import Platform from '../models/platform.js';
 import Category from '../models/category.js';
 import PartDefinition from '../models/partDefinition.js';
+import _find from 'lodash.find';
 
 const router = new Router({
   prefix: '/api'
@@ -186,7 +187,7 @@ export default (app) => {
       //    if it is active remove from platform but don't delete part in DB
       //    if it is not active remove from DB and platform
       ctx.status = 200;
-      ctx.body = await PartDefinition.findByIdAndUpdate(ctx.params.partId, ctx.request.body, {new: true});
+      ctx.body = await PartDefinition.findByIdAndUpdate(ctx.params.partId, ctx.request.body, { new: true });
     } catch (err) {
       const response = handleError(err);
       ctx.body = response.body;
@@ -236,6 +237,27 @@ export default (app) => {
       await platform.save();
       // set that as the body
       ctx.body = partGroup;
+      ctx.status = 200;
+    } catch (err) {
+      const response = handleError(err);
+      ctx.body = response.body;
+      ctx.status = response.status;
+    }
+  });
+
+  router.put('/platforms/:id/group/:groupId', async (ctx, next) => {
+    try {
+      await next();
+      // update the platform and sub document
+      const platform = await Platform.findOneAndUpdate({
+        _id: ctx.params.id, 'partGroups._id': ctx.params.groupId
+      }, {
+        $set: {
+          'partGroups.$': ctx.request.body
+        }
+      }, { new: true });
+      // set that as the body
+      ctx.body = _find(platform.partGroups, partGroup => partGroup._id == ctx.params.groupId); // eslint-disable-line eqeqeq
       ctx.status = 200;
     } catch (err) {
       const response = handleError(err);
